@@ -1,0 +1,1981 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>九龍塘人MVPA60 挑戰</title>
+    <style>
+        :root {
+            --game-primary: #FF5722;     /* 活力橙 */
+            --game-secondary: #4CAF50;   /* 體育綠 */
+            --game-blue: #00D2FF;        /* 冒險藍 */
+            --game-yellow: #FFC107;      /* 寶箱金 */
+            --game-purple: #9C27B0;      /* 能量紫 */
+            --game-bg: #121214;          /* 酷炫暗色背景 */
+            --panel-bg: #22252A;         /* 科技面板色 */
+            --text-light: #F5F6FA;
+            --text-dark: #2C3E50;
+            --border-style: 4px solid #111; /* 卡通邊框 */
+            --neon-glow: 0 0 15px rgba(0, 210, 255, 0.6);
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif, 'Microsoft JhengHei';
+            background-color: var(--game-bg);
+            background-image: 
+                radial-gradient(rgba(255, 255, 255, 0.05) 15%, transparent 15%),
+                radial-gradient(rgba(255, 255, 255, 0.05) 15%, transparent 15%);
+            background-size: 30px 30px;
+            background-position: 0 0, 15px 15px;
+            color: var(--text-light);
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* 遊戲主容器 */
+        .game-container {
+            background-color: var(--panel-bg);
+            border: 5px solid #000;
+            border-radius: 24px;
+            box-shadow: 0px 12px 0px #111, 0px 20px 25px rgba(0,0,0,0.6);
+            max-width: 520px;
+            width: 100%;
+            padding: 24px;
+            position: relative;
+        }
+
+        /* 校訓四角掛件 */
+        .corner-badge {
+            position: absolute;
+            width: 36px;
+            height: 36px;
+            background: #2d3035;
+            color: #fff;
+            border: 3px solid #111;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 15px;
+            cursor: pointer;
+            z-index: 99;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 2px 2px 0px #000;
+        }
+        .corner-badge:hover {
+            transform: scale(1.15);
+            background-color: var(--game-yellow);
+            color: #000;
+        }
+        .top-left { top: -12px; left: -12px; }
+        .top-right { top: -12px; right: -12px; }
+        .bottom-left { bottom: -12px; left: -12px; }
+        .bottom-right { bottom: -12px; right: -12px; }
+
+        /* 飄浮格言樣式 */
+        .motto-badge {
+            position: absolute;
+            background: rgba(0, 210, 255, 0.15);
+            color: #00D2FF;
+            border: 2px dashed rgba(0, 210, 255, 0.6);
+            padding: 4px 8px;
+            font-size: 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            z-index: 90;
+            transition: all 0.2s;
+        }
+        .motto-badge:hover {
+            background: rgba(0, 210, 255, 0.3);
+            border-color: #00D2FF;
+            transform: scale(1.05);
+        }
+        .motto-left {
+            left: -80px;
+            top: 120px;
+            transform: rotate(-90deg);
+        }
+        .motto-top {
+            top: -45px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .motto-right {
+            right: -80px;
+            top: 120px;
+            transform: rotate(90deg);
+        }
+
+        @media (max-width: 680px) {
+            .motto-left {
+                left: 10px;
+                top: -42px;
+                transform: none;
+            }
+            .motto-top {
+                top: -42px;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+            .motto-right {
+                right: 10px;
+                top: -42px;
+                transform: none;
+            }
+            body {
+                padding-top: 50px;
+            }
+        }
+
+        /* 頂部標題 */
+        .game-header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 3px dashed #3F444F;
+            padding-bottom: 15px;
+        }
+
+        .game-title {
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--game-yellow);
+            text-shadow: 3px 3px 0px #C90, 0 0 10px rgba(255,193,7,0.3);
+            margin: 8px 0;
+            letter-spacing: 1px;
+        }
+
+        .school-badge {
+            background-color: var(--game-primary);
+            color: white;
+            padding: 4px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: bold;
+            border: 2px solid #000;
+            display: inline-block;
+            box-shadow: 2px 2px 0px #000;
+        }
+
+        /* 關卡指示器 */
+        .level-tracker {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            position: relative;
+            padding: 0 10px;
+        }
+
+        .level-tracker::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 20px;
+            right: 20px;
+            height: 6px;
+            background-color: #111;
+            transform: translateY(-50%);
+            z-index: 1;
+            border-radius: 3px;
+        }
+
+        .level-step {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background-color: #333;
+            border: 3px solid #111;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            z-index: 2;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-size: 14px;
+            color: #aaa;
+        }
+
+        .level-step.active {
+            background-color: var(--game-yellow);
+            border-color: #fff;
+            color: #000;
+            transform: scale(1.2);
+            box-shadow: 0 0 15px var(--game-yellow);
+        }
+
+        .level-step.completed {
+            background-color: var(--game-secondary);
+            border-color: #fff;
+            color: white;
+        }
+
+        /* 關卡面板 */
+        .level-panel {
+            display: none;
+            animation: panelFadeIn 0.4s ease-out forwards;
+        }
+
+        .level-panel.active {
+            display: block;
+        }
+
+        @keyframes panelFadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .level-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #00D2FF;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            text-shadow: 0 0 8px rgba(0, 210, 255, 0.3);
+        }
+
+        /* 輸入框組件 */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #ddd;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 3px solid #111;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            background-color: #1A1C20;
+            color: white;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus {
+            border-color: var(--game-blue);
+            box-shadow: 0 0 10px rgba(33, 150, 243, 0.5);
+            background-color: #20232A;
+        }
+
+        /* 遊戲按鈕 */
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: bold;
+            border: 3px solid #000;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-transform: uppercase;
+        }
+
+        .btn-next {
+            background-color: var(--game-secondary);
+            color: white;
+            box-shadow: 0 5px 0 #1B5E20;
+        }
+
+        .btn-next:active {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 #1B5E20;
+        }
+
+        .btn-back {
+            background-color: #555;
+            color: #eee;
+            box-shadow: 0 5px 0 #222;
+        }
+
+        .btn-back:active {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 #222;
+        }
+
+        .btn:disabled {
+            background-color: #333 !important;
+            color: #666 !important;
+            box-shadow: none !important;
+            border-color: #222 !important;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* ================= 小遊戲專用樣式 ================= */
+
+        /* 1. BMI 長按掃描器 */
+        .scan-container {
+            background: #15181C;
+            border: 3px solid #111;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            margin-top: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .scanner-visual {
+            width: 110px;
+            height: 110px;
+            margin: 0 auto 15px;
+            border: 4px dashed #333;
+            border-radius: 50%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            background-color: #0F1114;
+        }
+
+        .scanner-laser {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: #00FF66;
+            box-shadow: 0 0 12px #00FF66;
+            animation: laserScan 2s infinite ease-in-out;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        @keyframes laserScan {
+            0% { top: 10%; }
+            50% { top: 90%; }
+            100% { top: 10%; }
+        }
+
+        .scanner-active .scanner-laser {
+            opacity: 1;
+        }
+
+        .scanner-active .scanner-visual {
+            border-color: #00FF66;
+            box-shadow: 0 0 20px rgba(0, 255, 102, 0.4);
+            animation: pulseBg 1s infinite alternate;
+        }
+
+        @keyframes pulseBg {
+            from { background-color: #0F1114; }
+            to { background-color: rgba(0, 255, 102, 0.1); }
+        }
+
+        .btn-hold-scan {
+            background: linear-gradient(135deg, #00C6FF, #0072FF);
+            color: white;
+            border: 3px solid #000;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 900;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #002266;
+            outline: none;
+            transition: all 0.1s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-hold-scan:active {
+            transform: translateY(2px);
+            box-shadow: 0 3px 0 #002266;
+        }
+
+        /* 運動量輸入與活動地圖 */
+        .activities-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .activity-card {
+            background-color: #1E2126;
+            border: 3px solid #111;
+            border-radius: 16px;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            box-shadow: 0 4px 0 #000;
+        }
+
+        .activity-card.completed {
+            border-color: var(--game-secondary);
+            background-color: rgba(76, 175, 80, 0.15);
+            box-shadow: 0 4px 0 #1B5E20;
+        }
+
+        .activity-card.active {
+            border-color: var(--game-blue);
+            box-shadow: var(--neon-glow);
+        }
+
+        .activity-icon {
+            font-size: 32px;
+            margin-bottom: 5px;
+        }
+
+        .activity-name {
+            font-weight: bold;
+            font-size: 13.5px;
+            color: #eee;
+            margin-bottom: 4px;
+        }
+
+        .activity-status {
+            font-size: 11px;
+            color: #888;
+            background: #111;
+            padding: 2px 6px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+
+        .activity-card.completed .activity-status {
+            color: #FFF;
+            background: #2E7D32;
+        }
+
+        /* 彈窗樣式 */
+        .minigame-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.9);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .minigame-window {
+            background-color: #1A1C20;
+            border: 4px solid var(--game-yellow);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(255, 193, 7, 0.3);
+            animation: zoomIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes zoomIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .minigame-title {
+            color: var(--game-yellow);
+            font-size: 20px;
+            font-weight: 900;
+            margin-bottom: 12px;
+        }
+
+        .minigame-instruction {
+            font-size: 13px;
+            color: #ccc;
+            margin-bottom: 15px;
+        }
+
+        /* 小遊戲 1: 步數加速器 */
+        .treadmill-area {
+            background-color: #15181C;
+            border: 3px solid #111;
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .track-bg {
+            height: 60px;
+            background: linear-gradient(180deg, #333 0%, #111 100%);
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid #000;
+            margin-bottom: 15px;
+        }
+
+        .track-runner {
+            position: absolute;
+            bottom: 8px;
+            left: 5%;
+            font-size: 32px;
+            transition: left 0.15s ease-out;
+        }
+
+        .track-finish {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 24px;
+        }
+
+        .btn-tap-walk {
+            background: linear-gradient(135deg, #FF512F, #DD2476);
+            color: white;
+            font-size: 22px;
+            font-weight: bold;
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            border: 3px solid #000;
+            box-shadow: 0 5px 0 #500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            outline: none;
+            transition: transform 0.05s;
+        }
+
+        .btn-tap-walk:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #500;
+        }
+
+        /* 小遊戲 2: 體育堂籃球神射手 */
+        .hoop-game-container {
+            width: 100%;
+            height: 120px;
+            background: #252830;
+            border-radius: 12px;
+            position: relative;
+            margin: 15px auto;
+            overflow: hidden;
+            border: 3px solid #111;
+        }
+
+        .hoop-zone {
+            width: 24%; 
+            height: 100%;
+            background-color: var(--game-secondary);
+            position: absolute;
+            left: 38%;
+            box-shadow: inset 0 0 15px rgba(255,255,255,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 11px;
+            font-weight: bold;
+            border-left: 2px dashed #fff;
+            border-right: 2px dashed #fff;
+        }
+
+        .hoop-pointer {
+            width: 10px;
+            height: 100%;
+            background-color: #FF1744;
+            position: absolute;
+            left: 0;
+            box-shadow: 0 0 10px #FF1744;
+            z-index: 5;
+        }
+
+        /* 小遊戲 3: 排球敏捷挑戰 */
+        .volleyball-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 15px auto;
+            max-width: 270px;
+        }
+
+        .vb-cell {
+            background-color: #2F333E;
+            height: 70px;
+            border: 3px solid #111;
+            border-radius: 12px;
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+
+        .vb-cell.target {
+            background-color: var(--game-primary);
+            border-color: #FFF;
+            box-shadow: 0 0 12px var(--game-primary);
+            transform: scale(1.05);
+        }
+
+        /* 小遊戲 4: 羽毛球接球挑戰 */
+        .badminton-court {
+            width: 100%;
+            height: 180px;
+            background-color: #0E7047;
+            border: 3px solid #FFF;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            margin: 15px 0;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
+        }
+
+        .badminton-shuttle {
+            position: absolute;
+            font-size: 32px;
+            cursor: pointer;
+            animation: bounceIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: inline-block;
+            padding: 8px;
+        }
+
+        /* 小遊戲 5: 足球接接樂 */
+        .catch-game-area {
+            height: 240px;
+            background: #111;
+            border: 3px solid #333;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            margin: 15px 0;
+            background-image: linear-gradient(to bottom, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 100% 20px;
+        }
+
+        .catcher-basket {
+            position: absolute;
+            bottom: 5px;
+            left: 40%;
+            width: 60px;
+            height: 18px;
+            background-color: var(--game-yellow);
+            border-radius: 4px 4px 8px 8px;
+            border: 2px solid #000;
+            transition: left 0.08s ease-out;
+        }
+
+        .falling-ball {
+            position: absolute;
+            top: 0px;
+            left: 50%;
+            font-size: 28px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .control-btns {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+
+        .arrow-btn {
+            background: #333;
+            color: white;
+            border: 3px solid #000;
+            padding: 8px 22px;
+            font-size: 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #111;
+        }
+
+        .arrow-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #111;
+        }
+
+        /* 進度條與結算結果 */
+        .result-box {
+            border: 4px solid #000;
+            background-color: #1C1F24;
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .result-badge {
+            font-size: 55px;
+            animation: bounce 0.8s infinite alternate;
+        }
+
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-8px); }
+        }
+
+        .progress-bar-container {
+            background-color: #111;
+            border: 3px solid #000;
+            border-radius: 50px;
+            height: 30px;
+            overflow: hidden;
+            position: relative;
+            margin: 15px 0;
+        }
+
+        .progress-bar-fill {
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            height: 100%;
+            width: 0%;
+            transition: width 1.2s cubic-bezier(0.1, 0.8, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 12px;
+            color: white;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px #000;
+            font-size: 13px;
+        }
+
+        /* 特訓建議信箱 */
+        .advice-box {
+            background-color: #FFFDE7;
+            color: #222;
+            border: 3px solid #000;
+            border-radius: 16px;
+            padding: 15px;
+            margin-top: 15px;
+            text-align: left;
+            box-shadow: 4px 4px 0px #000;
+        }
+
+        .advice-title {
+            font-weight: 900;
+            color: var(--game-primary);
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 8px;
+        }
+
+        .advice-text {
+            font-size: 13px;
+            line-height: 1.5;
+            font-weight: bold;
+        }
+
+        .progress-indicator {
+            background: #111;
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--game-yellow);
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <!-- 校訓四角掛件 -->
+    <div class="corner-badge top-left" id="badge-勤" onclick="checkCornerBadge('勤')">勤</div>
+    <div class="corner-badge top-right" id="badge-樸" onclick="checkCornerBadge('樸')">樸</div>
+    <div class="corner-badge bottom-left" id="badge-誠" onclick="checkCornerBadge('誠')">誠</div>
+    <div class="corner-badge bottom-right" id="badge-勇" onclick="checkCornerBadge('勇')">勇</div>
+
+    <!-- 飄浮格言按鍵 -->
+    <div class="motto-badge motto-left" onclick="clickMottoSequence(1)">相信自己</div>
+    <div class="motto-badge motto-top" onclick="clickMottoSequence(2)">發揮所長</div>
+    <div class="motto-badge motto-right" onclick="clickMottoSequence(3)">推己及人</div>
+
+    <!-- 遊戲頂部標題 -->
+    <div class="game-header">
+        <span class="school-badge">🏫 九龍塘學校（中學部）</span>
+        <h1 class="game-title">🏆 九龍塘人MVPA60 挑戰</h1>
+    </div>
+
+    <!-- 關卡指示器 -->
+    <div class="level-tracker">
+        <div class="level-step active" id="step-1">1</div>
+        <div class="level-step" id="step-2">2</div>
+        <div class="level-step" id="step-3">3</div>
+        <div class="level-step" id="step-4">🏆</div>
+    </div>
+
+    <!-- ================= 關卡 1：登入勇者 ================= -->
+    <div class="level-panel active" id="panel-1">
+        <div class="level-title">👤 關卡 1：創建運動勇者</div>
+        <div class="form-group">
+            <label for="student-name">🙋‍♂️ 輸入你的勇者名字 (姓名)</label>
+            <input type="text" id="student-name" placeholder="例如：陳小明" autocomplete="off">
+        </div>
+        <div class="form-row" style="display: flex; gap: 12px;">
+            <div class="form-group" style="flex: 1;">
+                <label for="student-class">🏫 班別</label>
+                <input type="text" id="student-class" placeholder="例如：3A" autocomplete="off">
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label for="student-id">🔢 學號</label>
+                <input type="number" id="student-id" placeholder="例如：12">
+            </div>
+        </div>
+        <div class="btn-group">
+            <button class="btn btn-next" onclick="nextLevel(2)">
+                踏上旅程！ 🚀
+            </button>
+        </div>
+    </div>
+
+    <!-- ================= 關卡 2：BMI 檢測 ================= -->
+    <div class="level-panel" id="panel-2">
+        <div class="level-title">⚖️ 關卡 2：身體質量 (BMI) 掃描</div>
+
+        <div class="form-row" style="display: flex; gap: 12px;">
+            <div class="form-group" style="flex: 1;">
+                <label for="student-height">📏 身高 (cm)</label>
+                <input type="number" id="student-height" placeholder="例如：165" step="0.1">
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label for="student-weight">⚖️ 體重 (kg)</label>
+                <input type="number" id="student-weight" placeholder="例如：55" step="0.1">
+            </div>
+        </div>
+
+        <!-- BMI 掃描小遊戲 -->
+        <div class="scan-container" id="scan-container">
+            <div class="scanner-visual">
+                📟
+                <div class="scanner-laser"></div>
+            </div>
+            <div id="scan-text" style="font-weight: bold; margin-bottom: 12px; color: #aaa;">長按下方按鈕 5 秒開啟 AI 體能掃描</div>
+
+            <div class="progress-bar-container" style="margin: 10px 0;">
+                <div class="progress-bar-fill" id="scan-bar-fill" style="width: 0%; background: #00FF66;"></div>
+            </div>
+
+            <button class="btn-hold-scan" id="btn-hold-scan" 
+                    onmousedown="startScanning()" onmouseup="stopScanning()" onmouseleave="stopScanning()"
+                    ontouchstart="startScanning(event)" ontouchend="stopScanning(event)">
+                🎯 長按 5 秒啟動掃描 🎯
+            </button>
+        </div>
+
+        <div id="bmi-result-display" style="display:none; margin-top: 15px; padding: 12px; border-radius: 12px; background: #2f343c; text-align: center; border: 2px solid #00FF66;">
+            <!-- BMI結果 -->
+        </div>
+
+        <div class="btn-group">
+            <button class="btn btn-back" onclick="prevLevel(1)">返回</button>
+            <button class="btn btn-next" id="btn-to-level-3" onclick="nextLevel(3)" disabled>
+                鎖定數據 🔒
+            </button>
+        </div>
+    </div>
+
+    <!-- ================= 關卡 3：運動地圖 ================= -->
+    <div class="level-panel" id="panel-3">
+        <div class="level-title">🗺️ 關卡 3：解鎖每週活動地圖</div>
+        <p style="font-size:12.5px; color:#aaa; margin-top:-10px;">點擊下方各項運動，輸入數據並挑戰專屬迷你小遊戲，收集運動能量！</p>
+
+        <div class="progress-indicator" id="hub-completion">
+            🗺️ 地圖完成進度：0 / 5 🎮
+        </div>
+
+        <div class="activities-grid">
+            <!-- 1. 步行步數 -->
+            <div class="activity-card" id="card-steps" onclick="openGameModal('steps')">
+                <div class="activity-icon">👣</div>
+                <div class="activity-name">每日步行步數</div>
+                <span class="activity-status" id="status-steps">未解鎖</span>
+            </div>
+            <!-- 2. 體育堂 -->
+            <div class="activity-card" id="card-pe" onclick="openGameModal('pe')">
+                <div class="activity-icon">🏀</div>
+                <div class="activity-name">體育課時間</div>
+                <span class="activity-status" id="status-pe">未解鎖</span>
+            </div>
+            <!-- 3. 校隊訓練 -->
+            <div class="activity-card" id="card-team" onclick="openGameModal('team')">
+                <div class="activity-icon">🏐</div>
+                <div class="activity-name">校隊訓練</div>
+                <span class="activity-status" id="status-team">未解鎖</span>
+            </div>
+            <!-- 4. 課餘訓練 -->
+            <div class="activity-card" id="card-afterSchool" onclick="openGameModal('afterSchool')">
+                <div class="activity-icon">🏸</div>
+                <div class="activity-name">課餘運動訓練</div>
+                <span class="activity-status" id="status-afterSchool">未解鎖</span>
+            </div>
+            <!-- 5. 小息/午膳 -->
+            <div class="activity-card" id="card-recess" onclick="openGameModal('recess')" style="grid-column: span 2;">
+                <div class="activity-icon">⚽</div>
+                <div class="activity-name">小息/午膳體育活動</div>
+                <span class="activity-status" id="status-recess">未解鎖</span>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn btn-back" onclick="prevLevel(2)">返回</button>
+            <button class="btn btn-next" id="btn-to-level-4" onclick="nextLevel(4)" disabled>
+                進入結算 🏆
+            </button>
+        </div>
+    </div>
+
+    <!-- ================= 關卡 4：大結算 ================= -->
+    <div class="level-panel" id="panel-4">
+        <div class="level-title">🏆 最終關卡：九龍塘人 MVPA60 結算</div>
+
+        <div class="result-box">
+            <div class="result-badge" id="result-emoji">🥇</div>
+            <h2 id="result-status-title" style="margin:10px 0; color: var(--game-yellow);">活力指數爆表！</h2>
+
+            <p style="font-size:14px; margin: 5px 0;">勇者姓名: <span id="lbl-name" style="color: #00D2FF; font-weight:bold;"></span></p>
+            <p style="font-size:14px; margin: 5px 0;">班別 / 學號: <span id="lbl-class-id" style="color: #00D2FF; font-weight:bold;"></span></p>
+            <p style="font-size:14px; margin: 5px 0;">BMI 掃描報告: <span id="lbl-bmi" style="color:#00FF66; font-weight:bold;"></span></p>
+
+            <!-- 隱藏關卡稱號結算展示區 -->
+            <p style="font-size:14px; margin: 5px 0; display:none;" id="lbl-swimming-result"></p>
+            <p style="font-size:14px; margin: 5px 0; display:none;" id="lbl-running-result"></p>
+
+            <div style="border-top: 1px dashed #444; margin: 15px 0; padding-top: 10px;">
+                <p style="font-weight:bold; font-size:14px; margin-bottom: 5px;">🎯 每週中等至劇烈運動量 (MVPA) 累計：</p>
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill" id="mvpa-bar-fill">0%</div>
+                </div>
+                <p style="font-size:13px; color:#aaa;" id="mvpa-minutes-summary">0 / 420 分鐘 (目標：每週 420 分鐘)</p>
+            </div>
+        </div>
+
+        <!-- 特訓建議信箱 -->
+        <div class="advice-box">
+            <div class="advice-title">📩 曾嘉銘老師的體能特訓建議：</div>
+            <div class="advice-text" id="advice-text">
+                加載建議中...
+            </div>
+        </div>
+
+        <!-- 🏫 體育科專屬格言 -->
+        <div class="motto-box" style="margin-top: 20px; text-align: center; border: 3px double var(--game-yellow); border-radius: 12px; padding: 12px; background: #1B1E22; box-shadow: 0 0 10px rgba(255,193,7,0.15);">
+            <div style="font-size: 13px; color: var(--game-yellow); font-weight: bold; letter-spacing: 1px; margin-bottom: 4px;">🏫 九龍塘學校（中學部）體育科格言</div>
+            <div style="font-size: 16px; font-weight: 900; color: #FFF; text-shadow: 0 0 5px var(--game-blue); letter-spacing: 0.5px;">
+                「相信自己，發揮所長，推己及人」
+            </div>
+        </div>
+
+        <div class="btn-group" style="margin-top: 15px;">
+            <button class="btn btn-back" onclick="restartGame()">重新挑戰 🔄</button>
+        </div>
+    </div>
+
+    <!-- 隱藏格言解鎖提示欄 -->
+    <div id="hidden-motto-panel" style="display:none; text-align:center; margin-top:20px; border:2px dashed #00D2FF; background:rgba(0,210,255,0.05); padding:10px; border-radius:12px;">
+        <div style="font-weight:bold; color:var(--game-yellow); font-size:14px;">🔓 發現秘密！九龍塘人體育科格言隱藏通路</div>
+        <div id="hidden-motto-text" style="font-size:12px; color:#ddd; margin-top:5px;"></div>
+    </div>
+
+</div>
+
+<!-- ======================= 遊戲彈窗集 ======================= -->
+
+<!-- 1. 步數加速器彈窗 -->
+<div class="minigame-overlay" id="modal-steps">
+    <div class="minigame-window">
+        <div class="minigame-title">👣 步數加速跑鞋</div>
+        <div class="form-group" style="text-align: left;">
+            <label for="input-steps">👣 平均每日步行步數</label>
+            <input type="number" id="input-steps" placeholder="例如：8000">
+        </div>
+        <div class="minigame-instruction">連續點擊下方「STEP」踏步挑戰 50 次，啟動智能計步器！</div>
+
+        <div class="treadmill-area">
+            <div class="track-bg">
+                <div class="track-runner" id="track-runner">🏃‍♂️</div>
+                <div class="track-finish">🏁</div>
+            </div>
+            <div id="step-counter" style="font-weight:bold; font-size:16px; color:var(--game-yellow); margin-bottom:10px;">0 / 50 步</div>
+            <button class="btn-tap-walk" onclick="tapStep()">STEP</button>
+        </div>
+        <button class="btn btn-back" onclick="closeGameModal('steps')">關閉</button>
+    </div>
+</div>
+
+<!-- 2. 體育堂神射手彈窗 -->
+<div class="minigame-overlay" id="modal-pe">
+    <div class="minigame-window">
+        <div class="minigame-title">🏀 體育堂神射手挑戰</div>
+        <div class="form-group" style="text-align: left;">
+            <label for="input-pe">⏱️ 每星期體育堂時間 (分鐘)</label>
+            <input type="number" id="input-pe" placeholder="例如：80">
+        </div>
+        <div class="minigame-instruction">當紅針移動到綠色區域時點擊「投籃」，累計射中 5 次投籃！</div>
+
+        <div class="hoop-game-container">
+            <div class="hoop-zone">🏀 命中範圍</div>
+            <div class="hoop-pointer" id="hoop-pointer"></div>
+        </div>
+
+        <div id="hoop-score" style="font-weight:bold; font-size:16px; color:var(--game-yellow); margin-bottom:15px;">射中次數: 0 / 5 🏀</div>
+
+        <div style="display:flex; gap:10px;">
+            <button class="btn btn-next" onclick="shootHoop()" style="background:var(--game-primary); box-shadow: 0 5px 0 #b33600;">🔥 投籃！</button>
+            <button class="btn btn-back" onclick="closeGameModal('pe')">關閉</button>
+        </div>
+    </div>
+</div>
+
+<!-- 3. 校隊排球敏捷彈窗 -->
+<div class="minigame-overlay" id="modal-team">
+    <div class="minigame-window">
+        <div class="minigame-title">🏐 校隊排球敏捷訓練</div>
+        <div class="form-group" style="text-align: left;">
+            <label for="input-team">⏱️ 每星期校隊訓練時間 (分鐘)</label>
+            <input type="number" id="input-team" placeholder="例如：120">
+        </div>
+        <div class="minigame-instruction">點擊亮起橙色的方格進行排球殺球，命中 20 次！</div>
+
+        <div class="volleyball-grid">
+            <div class="vb-cell" id="vb-0" onclick="hitVolleyball(0)"></div>
+            <div class="vb-cell" id="vb-1" onclick="hitVolleyball(1)"></div>
+            <div class="vb-cell" id="vb-2" onclick="hitVolleyball(2)"></div>
+            <div class="vb-cell" id="vb-3" onclick="hitVolleyball(3)"></div>
+            <div class="vb-cell" id="vb-4" onclick="hitVolleyball(4)"></div>
+            <div class="vb-cell" id="vb-5" onclick="hitVolleyball(5)"></div>
+            <div class="vb-cell" id="vb-6" onclick="hitVolleyball(6)"></div>
+            <div class="vb-cell" id="vb-7" onclick="hitVolleyball(7)"></div>
+            <div class="vb-cell" id="vb-8" onclick="hitVolleyball(8)"></div>
+        </div>
+
+        <div id="vb-score" style="font-weight:bold; font-size:16px; color:var(--game-yellow); margin-bottom:15px;">成功殺球: 0 / 20 🏐</div>
+        <button class="btn btn-back" onclick="closeGameModal('team')">關閉</button>
+    </div>
+</div>
+
+<!-- 4. 課餘羽毛球耐力彈窗 -->
+<div class="minigame-overlay" id="modal-afterSchool">
+    <div class="minigame-window">
+        <div class="minigame-title">🏸 課餘羽毛球眼界大考驗</div>
+        <div class="form-group" style="text-align: left;">
+            <label for="input-afterSchool">⏱️ 每星期課餘訓練時間 (分鐘)</label>
+            <input type="number" id="input-afterSchool" placeholder="例如：60">
+        </div>
+        <div class="minigame-instruction" style="color: #FFC107; font-weight: bold; font-size: 12.5px; line-height: 1.4;">
+            ⚠️ 請只點選「羽毛球 🏸」接球！<br>
+            ❌ 若誤點 乒乓球 🏓、網球 🎾、高爾夫球 ⛳ 會被扣 1 分！<br>
+            🎯 成功接住 10 次羽毛球即可通關！
+        </div>
+
+        <div class="badminton-court" id="badminton-court" style="position: relative; height: 180px; background: #0E7047; border: 3px solid #fff; border-radius: 12px; overflow: hidden; margin: 12px 0;">
+            <!-- 球體隨機產生在此處 -->
+        </div>
+
+        <div id="badminton-score" style="font-weight:bold; font-size:16px; color:var(--game-yellow); margin-bottom:15px;">接住球數: 0 / 10 🏸</div>
+        <button class="btn btn-back" onclick="closeGameModal('afterSchool')">關閉</button>
+    </div>
+</div>
+
+<!-- 5. 小息/午膳足球彈窗 -->
+<div class="minigame-overlay" id="modal-recess">
+    <div class="minigame-window">
+        <div class="minigame-title">⚽ 小息午膳足球接接樂</div>
+        <div class="form-group" style="text-align: left;">
+            <label for="input-recess">⏱️ 每星期小息/午膳活動時間 (分鐘)</label>
+            <input type="number" id="input-recess" placeholder="例如：40">
+        </div>
+        <div class="minigame-instruction">使用左右按鈕移動下方金色接球框，接住 10 球隨機波速的足球！</div>
+
+        <div class="catch-game-area" id="soccer-game-area">
+            <div class="catcher-basket" id="catcher-basket"></div>
+            <div class="falling-ball" id="falling-ball">⚽</div>
+        </div>
+
+        <div class="control-btns">
+            <button class="arrow-btn" onclick="moveBasket(-1)">◀</button>
+            <button class="arrow-btn" onclick="moveBasket(1)">▶</button>
+        </div>
+
+        <div id="soccer-score" style="font-weight:bold; font-size:16px; color:var(--game-yellow); margin-bottom:15px;">接住足球: 0 / 10 ⚽</div>
+        <button class="btn btn-back" onclick="closeGameModal('recess')">關閉</button>
+    </div>
+</div>
+
+<!-- ======================= 隱藏彩蛋遊戲彈窗 ======================= -->
+
+<!-- 隱藏關卡 1: 水運會手速挑戰 -->
+<div class="minigame-overlay" id="modal-swimming">
+    <div class="minigame-window" style="border-color: #00D2FF; box-shadow: 0 0 30px rgba(0,210,255,0.4);">
+        <div class="minigame-title" style="color:#00D2FF;">🏊‍♂️ 隱藏關卡 1：校園水運會挑戰</div>
+        <div class="minigame-instruction">【勤、樸、誠、勇】校訓集結！於 10 秒內點擊下方按鈕 40 次游向終點！</div>
+
+        <div style="background:#0F1114; border:3px solid #00D2FF; border-radius:12px; padding:15px; margin: 15px 0; overflow:hidden; position:relative; height:100px;">
+            <div style="position:absolute; top:0; left:0; width:100%; height:100%; background:linear-gradient(180deg, #005082 0%, #002B49 100%); opacity:0.8;"></div>
+            <div style="position:absolute; top:33%; left:0; width:100%; border-top: 2px dashed rgba(255,255,255,0.4);"></div>
+            <div style="position:absolute; top:66%; left:0; width:100%; border-top: 2px dashed rgba(255,255,255,0.4);"></div>
+            <div id="swimming-swimmer" style="position:absolute; left:5%; top:calc(50% - 20px); font-size:32px; transition: left 0.1s ease-out; z-index:10;">🏊‍♂️</div>
+            <div style="position:absolute; right:10px; top:calc(50% - 15px); font-size:24px; z-index:10;">🏁</div>
+        </div>
+
+        <div id="swimming-timer" style="font-weight:bold; font-size:18px; color:#FF1744; margin-bottom:15px;">時間限制：10.0s</div>
+        <button class="btn btn-next" onclick="tapSwim()" style="background:#00D2FF; color:#000; box-shadow:0 5px 0 #005082; font-size:18px; font-weight:900;">🔥 拼命划水！ 🔥</button>
+    </div>
+</div>
+
+<!-- 隱藏關卡 2: 陸運會短跑手速挑戰 -->
+<div class="minigame-overlay" id="modal-running">
+    <div class="minigame-window" style="border-color: #FF5722; box-shadow: 0 0 30px rgba(255,87,34,0.4);">
+        <div class="minigame-title" style="color:#FF5722;">🏃‍♂️ 隱藏關卡 2：陸運會百米飛人</div>
+        <div class="minigame-instruction">啟動【相信自己、發揮所長、推己及人】能量！10 秒內快速點擊按鈕 40 次衝線！</div>
+
+        <div style="background:#0F1114; border:3px solid #FF5722; border-radius:12px; padding:15px; margin: 15px 0; overflow:hidden; position:relative; height:100px;">
+            <div style="position:absolute; top:0; left:0; width:100%; height:100%; background:linear-gradient(180deg, #A8441F 0%, #6E260E 100%); opacity:0.8;"></div>
+            <div style="position:absolute; top:50%; left:0; width:100%; border-top: 2px solid rgba(255,255,255,0.7);"></div>
+            <div id="running-runner" style="position:absolute; left:5%; top:calc(50% - 20px); font-size:32px; transition: left 0.1s ease-out; z-index:10;">🏃‍♂️</div>
+            <div style="position:absolute; right:30px; top:0; width:5px; height:100%; background:#FF1744; z-index:9;"></div>
+            <div style="position:absolute; right:10px; top:calc(50% - 15px); font-size:24px; z-index:10;">🏁</div>
+        </div>
+
+        <div id="running-timer" style="font-weight:bold; font-size:18px; color:#FF1744; margin-bottom:15px;">時間限制：10.0s</div>
+        <button class="btn btn-next" onclick="tapRun()" style="background:#FF5722; color:#FFF; box-shadow:0 5px 0 #A8441F; font-size:18px; font-weight:900;">⚡ 奮力衝刺！ ⚡</button>
+    </div>
+</div>
+
+<script>
+    // 遊戲狀態庫
+    let player = {
+        name: "",
+        class: "",
+        id: "",
+        height: 0,
+        weight: 0,
+        bmi: 0,
+        bmiLevel: "",
+        swimmingResult: "", // 儲存水運會挑戰結果
+        runningResult: ""  // 儲存陸運會挑戰結果
+    };
+
+    let sportsData = {
+        stepsVal: 0,   // 每日步數
+        stepsMin: 0,   // 每週步數換算運動時數 (步數/10000) * 60分 * 7天
+        pe: 0,
+        team: 0,
+        afterSchool: 0,
+        recess: 0
+    };
+
+    let unlockedActivities = {
+        steps: false,
+        pe: false,
+        team: false,
+        afterSchool: false,
+        recess: false
+    };
+
+    // ================= 關卡管理 =================
+    function nextLevel(lvl) {
+        if (lvl === 2) {
+            const name = document.getElementById('student-name').value.trim();
+            const cls = document.getElementById('student-class').value.trim();
+            const id = document.getElementById('student-id').value.trim();
+            if (!name || !cls || !id) {
+                alert("🙋‍♂️ 請完整填寫勇者的名字、班別及學號，才能出發！");
+                return;
+            }
+            player.name = name;
+            player.class = cls;
+            player.id = id;
+        }
+
+        if (lvl === 4) {
+            calculateFinalResults();
+        }
+
+        // 切換面板
+        document.querySelectorAll('.level-panel').forEach(p => p.classList.remove('active'));
+        document.getElementById(`panel-${lvl}`).classList.add('active');
+
+        // 更新進度條
+        document.querySelectorAll('.level-step').forEach((s, idx) => {
+            if (idx + 1 < lvl) {
+                s.className = "level-step completed";
+            } else if (idx + 1 === lvl) {
+                s.className = "level-step active";
+            } else {
+                s.className = "level-step";
+            }
+        });
+    }
+
+    function prevLevel(lvl) {
+        document.querySelectorAll('.level-panel').forEach(p => p.classList.remove('active'));
+        document.getElementById(`panel-${lvl}`).classList.add('active');
+
+        document.querySelectorAll('.level-step').forEach((s, idx) => {
+            if (idx + 1 < lvl) {
+                s.className = "level-step completed";
+            } else if (idx + 1 === lvl) {
+                s.className = "level-step active";
+            } else {
+                s.className = "level-step";
+            }
+        });
+    }
+
+    function restartGame() {
+        // 清除所有數值與輸入框
+        document.getElementById('student-name').value = "";
+        document.getElementById('student-class').value = "";
+        document.getElementById('student-id').value = "";
+        document.getElementById('student-height').value = "";
+        document.getElementById('student-weight').value = "";
+
+        document.getElementById('input-steps').value = "";
+        document.getElementById('input-pe').value = "";
+        document.getElementById('input-team').value = "";
+        document.getElementById('input-afterSchool').value = "";
+        document.getElementById('input-recess').value = "";
+
+        scanProgress = 0;
+        document.getElementById('scan-bar-fill').style.width = '0%';
+        document.getElementById('scan-text').innerText = '長按下方按鈕 5 秒開啟 AI 體能掃描';
+        document.getElementById('bmi-result-display').style.display = 'none';
+        document.getElementById('btn-to-level-3').disabled = true;
+
+        unlockedActivities = { steps: false, pe: false, team: false, afterSchool: false, recess: false };
+        sportsData = { stepsVal: 0, stepsMin: 0, pe: 0, team: 0, afterSchool: 0, recess: 0 };
+        player.swimmingResult = "";
+        player.runningResult = "";
+
+        document.getElementById('hidden-motto-panel').style.display = 'none';
+        mottoStep = 0;
+
+        updateHubUI();
+        nextLevel(1);
+    }
+
+    // ================= 關卡 2: BMI 掃描小遊戲 =================
+    let scanProgress = 0;
+    let scanInterval = null;
+
+    function startScanning(e) {
+        if(e) e.preventDefault();
+        const height = parseFloat(document.getElementById('student-height').value);
+        const weight = parseFloat(document.getElementById('student-weight').value);
+
+        if (!height || !weight || height <= 0 || weight <= 0) {
+            alert("📏 請先輸入正確的身高和體重！");
+            return;
+        }
+
+        player.height = height;
+        player.weight = weight;
+
+        document.getElementById('scan-container').classList.add('scanner-active');
+        clearInterval(scanInterval);
+        scanInterval = setInterval(() => {
+            scanProgress += 2.5; 
+            if (scanProgress > 100) scanProgress = 100;
+            document.getElementById('scan-bar-fill').style.width = scanProgress + '%';
+            document.getElementById('scan-text').innerText = `正在分析身體組織... ${Math.round(scanProgress)}%`;
+
+            if (scanProgress >= 100) {
+                clearInterval(scanInterval);
+                finishScanning();
+            }
+        }, 100);
+    }
+
+    function stopScanning(e) {
+        if(e) e.preventDefault();
+        document.getElementById('scan-container').classList.remove('scanner-active');
+        clearInterval(scanInterval);
+        if (scanProgress < 100) {
+            scanProgress = 0;
+            document.getElementById('scan-bar-fill').style.width = '0%';
+            document.getElementById('scan-text').innerText = '⚠️ 掃描中斷！請長按按鈕 5 秒不要放手！';
+        }
+    }
+
+    function finishScanning() {
+        const h_m = player.height / 100;
+        const bmi = player.weight / (h_m * h_m);
+        player.bmi = bmi.toFixed(1);
+
+        let rating = "";
+        let color = "";
+        if (bmi < 18.5) {
+            rating = "偏輕 🍃 (多吸收營養，多做阻力運動喔！)";
+            color = "#FFC107";
+        } else if (bmi >= 18.5 && bmi < 23) {
+            rating = "完美標準！🏆 (強壯完美的勇者體態！)";
+            color = "#00FF66";
+        } else if (bmi >= 23 && bmi < 25) {
+            rating = "偏重 📈 (注意均衡飲食，加油多動動！)";
+            color = "#FF9800";
+        } else {
+            rating = "肥胖 ⚠️ (健康的身體需要更多的活力與運動！)";
+            color = "#FF1744";
+        }
+        player.bmiLevel = rating;
+
+        const display = document.getElementById('bmi-result-display');
+        display.style.display = 'block';
+        display.style.borderColor = color;
+        display.innerHTML = `
+            <div style="font-size: 16px; font-weight: bold; color:${color}">🔍 體能數據分析成功！</div>
+            <div style="font-size: 24px; font-weight: 900; margin: 5px 0;">BMI: ${player.bmi}</div>
+            <div style="font-size: 13px; font-weight: bold;">評級：${rating}</div>
+        `;
+
+        document.getElementById('btn-to-level-3').disabled = false;
+        document.getElementById('scan-text').innerText = '🎉 掃描完成！快鎖定數據前進！';
+    }
+
+
+    // ================= 關卡 3: 運動地圖與彈窗管理 =================
+    function openGameModal(activity) {
+        document.getElementById(`modal-${activity}`).style.display = 'flex';
+
+        // 觸發各別遊戲初始化
+        if (activity === 'steps') {
+            initStepGame();
+        } else if (activity === 'pe') {
+            initPEGame();
+        } else if (activity === 'team') {
+            initTeamGame();
+        } else if (activity === 'afterSchool') {
+            initAfterSchoolGame();
+        } else if (activity === 'recess') {
+            initRecessGame();
+        }
+    }
+
+    function closeGameModal(activity) {
+        document.getElementById(`modal-${activity}`).style.display = 'none';
+
+        // 停止相關遊戲循環
+        if (activity === 'pe') {
+            clearInterval(peInterval);
+        } else if (activity === 'afterSchool') {
+            clearInterval(badmintonTimer);
+            document.getElementById('badminton-court').innerHTML = '';
+        } else if (activity === 'recess') {
+            clearInterval(recessInterval);
+        }
+    }
+
+    function updateHubUI() {
+        let count = 0;
+        for (let key in unlockedActivities) {
+            const card = document.getElementById(`card-${key}`);
+            const status = document.getElementById(`status-${key}`);
+            if (unlockedActivities[key]) {
+                card.className = "activity-card completed";
+                if (key === 'steps') {
+                    status.innerText = `已注入 (${sportsData.stepsVal} 步 -> ${Math.round(sportsData.stepsMin)}分)`;
+                } else {
+                    status.innerText = `已解鎖 (${sportsData[key]} 分鐘)`;
+                }
+                count++;
+            } else {
+                card.className = "activity-card";
+                status.innerText = "未解鎖";
+            }
+        }
+
+        document.getElementById('hub-completion').innerText = `🗺️ 地圖完成進度：${count} / 5 🎮`;
+
+        if (count === 5) {
+            document.getElementById('btn-to-level-4').disabled = false;
+            document.getElementById('hub-completion').style.color = '#00FF66';
+            document.getElementById('hub-completion').innerText = `🎉 恭喜解鎖全部地圖！前進大結算！ 🏆`;
+        }
+    }
+
+    // --- 3.1 步數加速跑鞋小遊戲 ---
+    let stepCount = 0;
+    function initStepGame() {
+        stepCount = 0;
+        document.getElementById('step-counter').innerText = `0 / 50 步`;
+        document.getElementById('track-runner').style.left = '5%';
+    }
+
+    function tapStep() {
+        const val = parseInt(document.getElementById('input-steps').value);
+        if (!val || val <= 0) {
+            alert("👣 請先輸入你每天大約行了多少步！");
+            return;
+        }
+
+        stepCount++;
+        if (stepCount <= 50) {
+            const progress = (stepCount / 50) * 80 + 5;
+            document.getElementById('track-runner').style.left = progress + '%';
+            document.getElementById('step-counter').innerText = `${stepCount} / 50 步`;
+        }
+
+        if (stepCount === 50) {
+            sportsData.stepsVal = val;
+            // 步數換算：(步數 / 10000步) * 60分鐘 * 7天 (每週運動分鐘)
+            sportsData.stepsMin = (val / 10000) * 60 * 7;
+
+            setTimeout(() => {
+                alert(`🏃‍♂️ 踏步挑戰成功！已成功解鎖步數時數！每週換算 MVPA 時間：${Math.round(sportsData.stepsMin)} 分鐘！`);
+                unlockedActivities.steps = true;
+                closeGameModal('steps');
+                updateHubUI();
+            }, 100);
+        }
+    }
+
+    // --- 3.2 體育堂神射手小遊戲 ---
+    let peScore = 0;
+    let pePointerLeft = 0;
+    let peDirection = 1;
+    let peInterval = null;
+
+    function initPEGame() {
+        peScore = 0;
+        pePointerLeft = 0;
+        peDirection = 1;
+        document.getElementById('hoop-score').innerText = `射中次數: 0 / 5 🏀`;
+        clearInterval(peInterval);
+
+        peInterval = setInterval(() => {
+            pePointerLeft += peDirection * 2.5;
+            if (pePointerLeft >= 100) {
+                pePointerLeft = 100;
+                peDirection = -1;
+            } else if (pePointerLeft <= 0) {
+                pePointerLeft = 0;
+                peDirection = 1;
+            }
+            document.getElementById('hoop-pointer').style.left = pePointerLeft + '%';
+        }, 16); 
+    }
+
+    function shootHoop() {
+        const minVal = parseInt(document.getElementById('input-pe').value);
+        if (!minVal || minVal <= 0) {
+            alert("⏱️ 請先輸入每週體育堂課時數 (分鐘)！");
+            return;
+        }
+
+        // 綠色命中區域是 38% - 62%
+        if (pePointerLeft >= 38 && pePointerLeft <= 62) {
+            peScore++;
+            document.getElementById('hoop-score').innerText = `射中次數: ${peScore} / 5 🏀`;
+
+            // 命中閃綠光
+            const container = document.querySelector('.hoop-game-container');
+            container.style.backgroundColor = '#1B5E20';
+            setTimeout(() => container.style.backgroundColor = '#252830', 200);
+
+            if (peScore >= 5) {
+                clearInterval(peInterval);
+                sportsData.pe = minVal;
+                setTimeout(() => {
+                    alert("🏀 太準了！射手挑戰通關！體育課時間已解鎖！");
+                    unlockedActivities.pe = true;
+                    closeGameModal('pe');
+                    updateHubUI();
+                }, 100);
+            }
+        } else {
+            // 未擊中閃紅光
+            const container = document.querySelector('.hoop-game-container');
+            container.style.backgroundColor = '#B71C1C';
+            setTimeout(() => container.style.backgroundColor = '#252830', 200);
+        }
+    }
+
+    // --- 3.3 校隊排球敏捷挑戰 ---
+    let teamScore = 0;
+    let currentVbTarget = -1;
+
+    function initTeamGame() {
+        teamScore = 0;
+        document.getElementById('vb-score').innerText = `成功殺球: 0 / 20 🏐`;
+        spawnVolleyballTarget();
+    }
+
+    function spawnVolleyballTarget() {
+        // 清除舊目標
+        document.querySelectorAll('.vb-cell').forEach(c => {
+            c.classList.remove('target');
+            c.innerText = '';
+        });
+
+        // 隨機選一個新目標格
+        let randIdx;
+        do {
+            randIdx = Math.floor(Math.random() * 9);
+        } while (randIdx === currentVbTarget);
+
+        currentVbTarget = randIdx;
+        const cell = document.getElementById(`vb-${randIdx}`);
+        cell.classList.add('target');
+        cell.innerText = '🏐';
+    }
+
+    function hitVolleyball(idx) {
+        const minVal = parseInt(document.getElementById('input-team').value);
+        if (isNaN(minVal) || minVal < 0) {
+            alert("⏱️ 請先輸入你的每週校隊訓練時數（沒有就填 0 分鐘，遊戲後解鎖）！");
+            return;
+        }
+
+        if (idx === currentVbTarget) {
+            teamScore++;
+            document.getElementById('vb-score').innerText = `成功殺球: ${teamScore} / 20 🏐`;
+
+            if (teamScore >= 20) {
+                sportsData.team = minVal;
+                document.querySelectorAll('.vb-cell').forEach(c => {
+                    c.classList.remove('target');
+                    c.innerText = '';
+                });
+                setTimeout(() => {
+                    alert("🏐 完美防守與連續扣殺！校隊排球訓練已解鎖！");
+                    unlockedActivities.team = true;
+                    closeGameModal('team');
+                    updateHubUI();
+                }, 100);
+            } else {
+                spawnVolleyballTarget();
+            }
+        }
+    }
+
+    // --- 3.4 課餘羽毛球眼界與耐力挑戰 (多球干擾、錯擊扣分) ---
+    let badmintonScore = 0;
+    let badmintonTimer = null;
+
+    function initAfterSchoolGame() {
+        badmintonScore = 0;
+        document.getElementById('badminton-score').innerText = `接住球數: 0 / 10 🏸`;
+        const court = document.getElementById('badminton-court');
+        court.innerHTML = ''; 
+
+        clearInterval(badmintonTimer);
+        // 先產生一個球
+        spawnBadmintonBall();
+        // 每 800ms 嘗試刷出新球
+        badmintonTimer = setInterval(spawnBadmintonBall, 800);
+    }
+
+    function spawnBadmintonBall() {
+        const court = document.getElementById('badminton-court');
+        if (court.children.length >= 6) return;
+
+        const ball = document.createElement('div');
+        ball.className = 'badminton-shuttle';
+
+        // 隨機決定球類：0->真實羽毛球 (🏸)，1->乒乓球 (🏓)，2->網球 (🎾)，3->高爾夫球 (⛳)
+        const ballType = Math.floor(Math.random() * 4);
+        let icon = '🏸';
+        let isReal = true;
+
+        if (ballType === 1) { icon = '🏓'; isReal = false; }
+        else if (ballType === 2) { icon = '🎾'; isReal = false; }
+        else if (ballType === 3) { icon = '⛳'; isReal = false; }
+
+        ball.innerText = icon;
+
+        // 隨機擺放位置 %
+        const left = Math.random() * 82 + 4;
+        const top = Math.random() * 72 + 4;
+        ball.style.left = left + '%';
+        ball.style.top = top + '%';
+        ball.style.position = 'absolute';
+        ball.style.cursor = 'pointer';
+        ball.style.transition = 'opacity 0.2s, transform 0.1s';
+
+        // 設定球的生命週期為 2 秒，超時會淡出並自我銷毀
+        let lifeTimer = setTimeout(() => {
+            ball.style.opacity = '0';
+            setTimeout(() => ball.remove(), 200);
+        }, 2000);
+
+        ball.onclick = function(e) {
+            e.stopPropagation();
+            clearTimeout(lifeTimer);
+
+            const minVal = parseInt(document.getElementById('input-afterSchool').value);
+            if (isNaN(minVal) || minVal < 0) {
+                alert("⏱️ 請先輸入每週課餘運動訓練時數 (沒有就填 0)！");
+                ball.remove();
+                return;
+            }
+
+            if (isReal) {
+                badmintonScore++;
+                ball.style.transform = 'scale(1.5)';
+                ball.style.color = '#4CAF50';
+                setTimeout(() => ball.remove(), 100);
+            } else {
+                badmintonScore = Math.max(0, badmintonScore - 1);
+                ball.style.transform = 'scale(0.8)';
+                ball.style.color = '#FF1744';
+                setTimeout(() => ball.remove(), 100);
+
+                court.style.borderColor = '#FF1744';
+                setTimeout(() => court.style.borderColor = '#fff', 200);
+            }
+
+            document.getElementById('badminton-score').innerText = `接住球數: ${badmintonScore} / 10 🏸`;
+
+            if (badmintonScore >= 10) {
+                clearInterval(badmintonTimer);
+                court.innerHTML = '';
+                sportsData.afterSchool = minVal;
+                setTimeout(() => {
+                    alert("🏸 身手不凡！課餘羽毛球訓練已成功解鎖！");
+                    unlockedActivities.afterSchool = true;
+                    closeGameModal('afterSchool');
+                    updateHubUI();
+                }, 100);
+            }
+        };
+
+        court.appendChild(ball);
+    }
+
+    // --- 3.5 小息/午膳足球接球小遊戲 (放大畫面、隨機波速) ---
+    let recessScore = 0;
+    let basketLeft = 40;   
+    let ballX = 50;        
+    let ballY = 0;         
+    let ballBaseSpeed = 4; 
+    let speedPhase = 0;    
+    let recessInterval = null;
+
+    function initRecessGame() {
+        recessScore = 0;
+        basketLeft = 40;
+        ballX = Math.random() * 80 + 10;
+        ballY = 0;
+
+        ballBaseSpeed = Math.random() * 5 + 4; 
+        speedPhase = Math.random() * Math.PI * 2;
+
+        document.getElementById('soccer-score').innerText = `接住足球: 0 / 10 ⚽`;
+        updateRecessPositions();
+
+        clearInterval(recessInterval);
+        recessInterval = setInterval(() => {
+            speedPhase += 0.12;
+            let speedVariance = Math.sin(speedPhase) * 3.5; 
+            let currentSpeed = ballBaseSpeed + speedVariance;
+
+            if (currentSpeed < 2) currentSpeed = 2; 
+
+            ballY += currentSpeed;
+
+            if (ballY >= 215) {
+                const basketMin = basketLeft;
+                const basketMax = basketLeft + 15; 
+
+                if (ballX >= basketMin - 5 && ballX <= basketMax + 5) {
+                    recessScore++;
+                    document.getElementById('soccer-score').innerText = `接住足球: ${recessScore} / 10 ⚽`;
+
+                    if (recessScore >= 10) {
+                        clearInterval(recessInterval);
+                        const minVal = parseInt(document.getElementById('input-recess').value);
+                        sportsData.recess = isNaN(minVal) ? 0 : minVal;
+                        setTimeout(() => {
+                            alert("⚽ 強大的反射弧！小息/午膳足球大冒險成功通關！");
+                            unlockedActivities.recess = true;
+                            closeGameModal('recess');
+                            updateHubUI();
+                        }, 100);
+                    }
+                }
+
+                ballY = 0;
+                ballX = Math.random() * 80 + 10;
+                ballBaseSpeed = Math.random() * 5 + 4; 
+                speedPhase = Math.random() * Math.PI * 2;
+            }
+            updateRecessPositions();
+        }, 30);
+    }
+
+    function moveBasket(dir) {
+        basketLeft += dir * 15;
+        if (basketLeft < 0) basketLeft = 0;
+        if (basketLeft > 80) basketLeft = 80; 
+        updateRecessPositions();
+    }
+
+    function updateRecessPositions() {
+        document.getElementById('falling-ball').style.top = ballY + 'px';
+        document.getElementById('falling-ball').style.left = ballX + '%';
+        document.getElementById('catcher-basket').style.left = basketLeft + '%';
+    }
+
+
+    // ================= 關卡 4: 結算邏輯 =================
+    function calculateFinalResults() {
+        document.getElementById('lbl-name').innerText = player.name;
+        document.getElementById('lbl-class-id').innerText = `${player.class} 班 / ${player.id} 號`;
+        document.getElementById('lbl-bmi').innerText = `BMI: ${player.bmi} - ${player.bmiLevel}`;
+
+        // 顯示隱藏彩蛋稱號
+        const swEl = document.getElementById('lbl-swimming-result');
+        if (player.swimmingResult) {
+            swEl.style.display = 'block';
+            swEl.innerHTML = `🏊‍♂️ 校園水運會榮譽: <span style="color:#00D2FF; font-weight:bold; text-shadow:0 0 5px rgba(0,210,255,0.3);">${player.swimmingResult}</span>`;
+        } else {
+            swEl.style.display = 'none';
+        }
+
+        const runEl = document.getElementById('lbl-running-result');
+        if (player.runningResult) {
+            runEl.style.display = 'block';
+            runEl.innerHTML = `🏃‍♂️ 校園陸運會榮譽: <span style="color:#FF5722; font-weight:bold; text-shadow:0 0 5px rgba(255,87,34,0.3);">${player.runningResult}</span>`;
+        } else {
+            runEl.style.display = 'none';
+        }
+
+        // 運動量合計
+        const totalMin = Math.round(sportsData.stepsMin + sportsData.pe + sportsData.team + sportsData.afterSchool + sportsData.recess);
+        document.getElementById('mvpa-minutes-summary').innerText = `${totalMin} / 420 分鐘 (目標：每週 420 分鐘)`;
+
+        // 進度條比例
+        let pct = (totalMin / 420) * 100;
+        if (pct > 100) pct = 100;
+        document.getElementById('mvpa-bar-fill').style.width = pct + '%';
+        document.getElementById('mvpa-bar-fill').innerText = `${Math.round(pct)}%`;
+
+        const adviceBox = document.getElementById('advice-text');
+        const emojiEl = document.getElementById('result-emoji');
+        const titleEl = document.getElementById('result-status-title');
+
+        if (totalMin >= 420) {
+            emojiEl.innerText = "🥇";
+            titleEl.innerText = "👑 傳奇運動大師：MVPA60 成功達標！";
+            titleEl.style.color = "var(--game-secondary)";
+
+            adviceBox.innerHTML = `
+                恭喜 ${player.name} 同學！你真是九龍塘學校的健康典範！💪<br>
+                每週累積做運動超過了 ${totalMin} 分鐘，達到了世衛組織 MVPA60（每日60分鐘中等至劇烈身體活動）的國際金牌指標！<br>
+                你的 BMI 數值處於 <strong>${player.bmi}</strong>，配合健康的活動習慣，能讓你學習更專注、身體更有活力。運動可以促使大腦分泌安多酚，除了強身健體，還能讓你每天心情愉快！<br>
+                曾老師建議你保持現有的訓練量，甚至可以帶領身邊的班中好友一同多去操場跑跑步、打打球，成為九龍塘學校的運動領袖！🏆🌟
+            `;
+        } else {
+            emojiEl.innerText = "🥉";
+            titleEl.innerText = "⚡ 潛力勇者：再接再厲！";
+            titleEl.style.color = "var(--game-primary)";
+
+            const gap = 420 - totalMin;
+            adviceBox.innerHTML = `
+                ${player.name} 同學，你已經完成了挑戰，但每週總運動量是 ${totalMin} 分鐘，距離 MVPA60 目標還差 <strong>${gap} 分鐘</strong> 喔！<br>
+                不要氣餒，你是非常有潛力的健康勇者！曾老師為你準備了幾條體能提升策略：<br>
+                1\\. 🏃‍♂️ <strong>增加步行量：</strong>可以提早一兩個巴士站下車步行上學，或者在吃完飯後多散散步。<br>
+                2\\. ⚽ <strong>善用小息與午膳時間：</strong>多和同學到操場進行趣味遊戲或體育活動，一週就能輕鬆累積上百分鐘。<br>
+                3\\. 🏸 <strong>加入體育興趣小組：</strong>每週嘗試撥出一到兩天課餘時間跟朋友打打羽毛球或跑跑步，每次 30 分鐘，很快就能完美達標！<br>
+                期待你在下星期的體育課上向曾老師匯報你的新進步，一起為健康加油！👊🔥
+            `;
+        }
+    }
+
+    // ================= 隱藏彩蛋 1: 勤樸誠勇 水運會挑戰 =================
+    let mottoClicked = { 勤: false, 樸: false, 誠: false, 勇: false };
+    function checkCornerBadge(badge) {
+        mottoClicked[badge] = true;
+        const btn = document.getElementById(`badge-${badge}`);
+        btn.style.backgroundColor = "var(--game-yellow)";
+        btn.style.color = "#000";
+        btn.style.borderColor = "#FFF";
+        btn.style.boxShadow = "0 0 12px var(--game-yellow)";
+
+        if (mottoClicked['勤'] && mottoClicked['樸'] && mottoClicked['誠'] && mottoClicked['勇']) {
+            alert("🌟 恭喜你按齊了【勤、樸、誠、勇】校訓四字！\n即將開啟隱藏關卡 1：校園水運會挑戰！🏊‍♂️");
+            // 重置校訓點擊狀態
+            mottoClicked = { 勤: false, 樸: false, 誠: false, 勇: false };
+            setTimeout(() => {
+                // 還原外觀風格
+                ['勤', '樸', '誠', '勇'].forEach(b => {
+                    const el = document.getElementById(`badge-${b}`);
+                    el.style.backgroundColor = '';
+                    el.style.color = '';
+                    el.style.borderColor = '';
+                    el.style.boxShadow = '';
+                });
+                startSwimmingGame();
+            }, 800);
+        }
+    }
+
+    let swimmingClicks = 0;
+    let swimmingTimeLeft = 10.0;
+    let swimmingTimerInterval = null;
+    let swimmingActive = false;
+
+    function startSwimmingGame() {
+        swimmingClicks = 0;
+        swimmingTimeLeft = 10.0;
+        swimmingActive = true;
+        document.getElementById('swimming-swimmer').style.left = '5%';
+        document.getElementById('swimming-timer').innerText = `時間限制：10.0s`;
+        document.getElementById('modal-swimming').style.display = 'flex';
+
+        clearInterval(swimmingTimerInterval);
+        swimmingTimerInterval = setInterval(() => {
+            swimmingTimeLeft -= 0.1;
+            if (swimmingTimeLeft <= 0) {
+                swimmingTimeLeft = 0;
+                clearInterval(swimmingTimerInterval);
+                swimmingActive = false;
+                player.swimmingResult = "水運會參與者";
+                alert("⏰ 時間限制到！你完成了水運會賽事。獲得稱號：【水運會參與者】🏊‍♂️");
+                closeSwimmingGame();
+            }
+            document.getElementById('swimming-timer').innerText = `時間限制：${swimmingTimeLeft.toFixed(1)}s`;
+        }, 100);
+    }
+
+    function tapSwim() {
+        if (!swimmingActive) return;
+        swimmingClicks++;
+        if (swimmingClicks <= 40) {
+            const pct = 5 + (swimmingClicks / 40) * 80;
+            document.getElementById('swimming-swimmer').style.left = pct + '%';
+        }
+
+        if (swimmingClicks >= 40) {
+            clearInterval(swimmingTimerInterval);
+            swimmingActive = false;
+            player.swimmingResult = "水運會全場總冠軍";
+            alert("🏆 狂暴爆速手速！你成功奪得：【水運會全場總冠軍】稱號！🥇");
+            closeSwimmingGame();
+        }
+    }
+
+    function closeSwimmingGame() {
+        document.getElementById('modal-swimming').style.display = 'none';
+        clearInterval(swimmingTimerInterval);
+    }
+
+
+    // ================= 隱藏彩蛋 2: 格言解鎖 陸運會挑戰 =================
+    let mottoStep = 0;
+    function clickMottoSequence(step) {
+        const panel = document.getElementById('hidden-motto-panel');
+        const text = document.getElementById('hidden-motto-text');
+
+        if (step === 1) {
+            mottoStep = 1;
+            panel.style.display = 'block';
+            text.innerHTML = `「相信自己」已點亮！✨<br><span style="color:#00D2FF; font-weight:bold;">你無意中啟動了一個隱藏關卡！</span><br>提示：請順序按中其餘格言字句以完全解鎖...`;
+        } else if (step === 2) {
+            if (mottoStep === 1) {
+                mottoStep = 2;
+                text.innerHTML = `「相信自己 ➡️ 發揮所長」已解鎖！🔥<br>就差最後一步即可引爆體能能量！`;
+            } else {
+                mottoStep = 0;
+                panel.style.display = 'none';
+            }
+        } else if (step === 3) {
+            if (mottoStep === 2) {
+                mottoStep = 0; 
+                panel.style.display = 'none';
+                
+                alert("啟動九龍塘人體育科格言隱藏關卡陸運會 : 相信自己,發揮所長,推己及人");
+                startRunningGame();
+            } else {
+                mottoStep = 0;
+                panel.style.display = 'none';
+            }
+        }
+    }
+
+    let runningClicks = 0;
+    let runningTimeLeft = 10.0;
+    let runningTimerInterval = null;
+    let runningActive = false;
+
+    function startRunningGame() {
+        runningClicks = 0;
+        runningTimeLeft = 10.0;
+        runningActive = true;
+        document.getElementById('running-runner').style.left = '5%';
+        document.getElementById('running-timer').innerText = `時間限制：10.0s`;
+        document.getElementById('modal-running').style.display = 'flex';
+
+        clearInterval(runningTimerInterval);
+        runningTimerInterval = setInterval(() => {
+            runningTimeLeft -= 0.1;
+            if (runningTimeLeft <= 0) {
+                runningTimeLeft = 0;
+                clearInterval(runningTimerInterval);
+                runningActive = false;
+                player.runningResult = "陸運會參與者";
+                alert("⏰ 時間到！你完成了陸運會挑戰。獲得稱號：【陸運會參與者】🏃‍♂️");
+                closeRunningGame();
+            }
+            document.getElementById('running-timer').innerText = `時間限制：${runningTimeLeft.toFixed(1)}s`;
+        }, 100);
+    }
+
+    function tapRun() {
+        if (!runningActive) return;
+        runningClicks++;
+        if (runningClicks <= 40) {
+            const pct = 5 + (runningClicks / 40) * 80;
+            document.getElementById('running-runner').style.left = pct + '%';
+        }
+
+        if (runningClicks >= 40) {
+            clearInterval(runningTimerInterval);
+            runningActive = false;
+            player.runningResult = "陸運會全場總冠軍";
+            alert("🏆 閃電般的衝刺速度！你成功獲得：【陸運會全場總冠軍】稱號！🥇");
+            closeRunningGame();
+        }
+    }
+
+    function closeRunningGame() {
+        document.getElementById('modal-running').style.display = 'none';
+        clearInterval(runningTimerInterval);
+    }
+</script>
+
+</body>
+</html>
